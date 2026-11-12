@@ -1,0 +1,21 @@
+# Dependencias y compilación
+node_modules/
+dist/
+coverage/
+# Pruebas de punta a punta
+playwright-report/
+test-results/
+# IDE
+.idea/
+.vscode/
+# Entorno y secretos: nunca entran al repositorio
+.env
+.env.*
+!.env.example
+# Registros
+*.log
+npm-debug.log*
+# Sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
