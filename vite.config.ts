@@ -31,13 +31,17 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // El service worker nuevo reemplaza al anterior sin preguntar; la página lo usa en la siguiente carga.
+      // Actualización automática: el service worker nuevo toma el control apenas se instala, y
+      // src/main.tsx recarga la página (registerSW de virtual:pwa-register). Sin skipWaiting, la versión
+      // nueva se quedaba esperando mientras la app siguiera abierta en algún lado, aunque se recargara.
       registerType: 'autoUpdate',
-      injectRegister: 'script-defer',
+      injectRegister: false,
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'logo.svg'],
       manifest: manifiesto,
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],
