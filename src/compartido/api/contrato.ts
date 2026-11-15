@@ -59,6 +59,13 @@ export type MotivoDeRechazo =
   | 'DESTINATARIO_NO_DISPONIBLE'
   | 'CATEGORIA_NO_DISPONIBLE'
 
+/** Evento `kudo-recibido` de GET /api/avisos/en-vivo: alguien le dio un Kudo a la persona de la sesión. */
+export interface AvisoDeKudoRecibido {
+  readonly kudo: string
+  readonly autor: string
+  readonly categoria: string
+}
+
 /** El puerto con el que el front habla con la API; las pruebas lo reemplazan por uno falso. */
 export interface ApiDeUcoKudos {
   yo(): Promise<PersonaDeLaSesion>
@@ -66,4 +73,6 @@ export interface ApiDeUcoKudos {
   categorias(): Promise<readonly Categoria[]>
   muro(pagina: number, tamano: number): Promise<readonly KudoDelMuro[]>
   publicar(solicitud: SolicitudDePublicacion): Promise<KudoPublicado>
+  /** Escucha los avisos en vivo mientras la app está abierta (ADR-021). Devuelve la función que deja de escuchar. */
+  avisosEnVivo(alAviso: (aviso: AvisoDeKudoRecibido) => void): () => void
 }

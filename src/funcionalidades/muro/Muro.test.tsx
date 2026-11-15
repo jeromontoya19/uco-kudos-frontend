@@ -77,4 +77,27 @@ describe('useMuro', () => {
 
     await waitFor(() => expect(resultado.current.kudos).toHaveLength(TAMANO_DE_PAGINA + 1))
   })
+
+  it('trae los Kudos nuevos y los pone arriba, sin repetir los que ya se ven', async () => {
+    const api = crearApiFalsa()
+    api.muro.mockResolvedValueOnce(kudos(2)).mockResolvedValueOnce([kudo({ id: 'k9' }), ...kudos(2)])
+    const resultado = await muroCargado(api)
+
+    act(() => resultado.current.traerNuevos())
+
+    await waitFor(() => expect(resultado.current.kudos.map((uno) => uno.id)).toEqual(['k9', 'k0', 'k1']))
+    expect(api.muro).toHaveBeenLastCalledWith(0, TAMANO_DE_PAGINA)
+  })
+
+  it('deja el muro como estaba si no pudo traer los nuevos', async () => {
+    const api = crearApiFalsa()
+    api.muro.mockResolvedValueOnce(kudos(2)).mockRejectedValueOnce(new ErrorDeApi('red', 'Sin conexión'))
+    const resultado = await muroCargado(api)
+
+    act(() => resultado.current.traerNuevos())
+
+    await waitFor(() => expect(api.muro).toHaveBeenCalledTimes(2))
+    expect(resultado.current.kudos.map((uno) => uno.id)).toEqual(['k0', 'k1'])
+    expect(resultado.current.error).toBeUndefined()
+  })
 })

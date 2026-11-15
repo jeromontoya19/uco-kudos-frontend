@@ -44,5 +44,6 @@ export function crearApiFalsa(cambios: Partial<ApiDeUcoKudos> = {}) {
     publicar: vi.fn<ApiDeUcoKudos['publicar']>(
       cambios.publicar ?? (() => Promise.resolve({ id: 'nuevo', publicadoEn: '2026-11-15T03:00:00Z' })),
     ),
+    avisosEnVivo: vi.fn<ApiDeUcoKudos['avisosEnVivo']>(cambios.avisosEnVivo ?? (() => () => undefined)),
   }
 }
