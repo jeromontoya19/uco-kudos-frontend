@@ -61,7 +61,7 @@ jobs:
           cache-dependency-path: version-anterior/package-lock.json
       - name: Instalar las dependencias exactas de su package-lock
         working-directory: version-anterior
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Compilar con la versión de ese commit
         working-directory: version-anterior
         run: npm run build

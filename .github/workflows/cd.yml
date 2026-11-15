@@ -30,7 +30,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Instalar las dependencias exactas del package-lock
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Compilar con la versión del commit
         run: npm run build
         env:
