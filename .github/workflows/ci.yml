@@ -1,0 +1,87 @@
+# Integración continua (ADR-013, ADR-023).
+# - CI rápida: cada push a codigo-desarrollo. Lint, pruebas unitarias y build.
+# - CI completa: cada PR a codigo-testing o a main. Suma la cobertura, Sonar y Trivy.
+# Las acciones de terceros se fijan por SHA de commit (cadena de suministro).
+name: CI
+
+on:
+  push:
+    branches: [codigo-desarrollo]
+    paths-ignore: ["**/*.md"]
+  pull_request:
+    branches: [codigo-testing, main]
+    paths-ignore: ["**/*.md"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rapida:
+    name: CI rápida (lint, pruebas y build)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Instalar las dependencias exactas del package-lock
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Pruebas unitarias
+        run: npm test
+      - name: Build (tipos de TypeScript y empaquetado)
+        run: npm run build
+
+  completa:
+    name: CI completa (cobertura, Sonar y Trivy)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Sonar necesita el historial completo para atribuir cada línea nueva.
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Instalar las dependencias exactas del package-lock
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Pruebas unitarias con cobertura (mínimo 70 %)
+        run: npm run test:cobertura
+      - name: Build (tipos de TypeScript y empaquetado)
+        run: npm run build
+
+      - name: Análisis de Sonar y su quality gate
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
+      - name: Aviso si falta Sonar
+        if: env.SONAR_TOKEN == ''
+        run: echo "::warning::Falta el secreto SONAR_TOKEN, así que el análisis de Sonar no corrió."
+
+      # Frena el cambio si hay una vulnerabilidad CRÍTICA o ALTA que ya tenga corrección.
+      # Incluye las dependencias de desarrollo: corren en la CI, donde están los secretos.
+      - name: Trivy sobre las dependencias
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_INCLUDE_DEV_DEPS: "true"
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
