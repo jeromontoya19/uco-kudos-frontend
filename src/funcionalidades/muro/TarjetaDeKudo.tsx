@@ -5,9 +5,10 @@ import estilos from './Muro.module.css'
 // El contenido se muestra como texto: React lo escapa, así que un Kudo no puede inyectar HTML.
 export function TarjetaDeKudo({ kudo }: { readonly kudo: KudoDelMuro }) {
   return (
-    <article className={estilos.tarjeta}>
+    <article className={`vidrio-ligero ${estilos.tarjeta}`}>
       <p className={estilos.quien}>
-        <strong>{kudo.autor.nombre}</strong> reconoció a <strong>{kudo.destinatario.nombre}</strong>
+        <strong>{kudo.autor.nombre}</strong> reconoció a{' '}
+        <strong className="resaltado">{kudo.destinatario.nombre}</strong>
       </p>
       <p className={estilos.categoria}>{kudo.categoria}</p>
       <p className={estilos.contenido}>{kudo.contenido}</p>

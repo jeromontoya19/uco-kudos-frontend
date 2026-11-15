@@ -7,15 +7,24 @@ import { nombreDelRol } from './roles'
 
 describe('Cabecera', () => {
   it('muestra el nombre y el rol de la persona', () => {
-    render(<Cabecera persona={DOCENTE} alCerrarSesion={vi.fn<() => void>()} />)
+    render(<Cabecera persona={DOCENTE} alDarUnKudo={vi.fn<() => void>()} alCerrarSesion={vi.fn<() => void>()} />)
 
     expect(screen.getByText('Ana Docente')).toBeInTheDocument()
     expect(screen.getByText('Docente')).toBeInTheDocument()
   })
 
+  it('abre el panel para publicar con «Dar un Kudo»', async () => {
+    const alDarUnKudo = vi.fn<() => void>()
+    render(<Cabecera persona={DOCENTE} alDarUnKudo={alDarUnKudo} alCerrarSesion={vi.fn<() => void>()} />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dar un Kudo' }))
+
+    expect(alDarUnKudo).toHaveBeenCalledTimes(1)
+  })
+
   it('cierra la sesión con su botón', async () => {
     const alCerrarSesion = vi.fn<() => void>()
-    render(<Cabecera persona={DOCENTE} alCerrarSesion={alCerrarSesion} />)
+    render(<Cabecera persona={DOCENTE} alDarUnKudo={vi.fn<() => void>()} alCerrarSesion={alCerrarSesion} />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
 

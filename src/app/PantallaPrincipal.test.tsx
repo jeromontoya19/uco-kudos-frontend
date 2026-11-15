@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ProveedorDeApiFija } from '../compartido/api/ProveedorDeApi'
@@ -21,24 +21,29 @@ function apiQueFallaEnYo(tipo: TipoDeErrorDeApi) {
 }
 
 describe('PantallaPrincipal', () => {
-  it('muestra la cabecera, el formulario para publicar y el muro', async () => {
+  it('muestra la cabecera con «Dar un Kudo» y el muro, con el panel cerrado', async () => {
     mostrar()
 
     expect(await screen.findByRole('banner')).toHaveTextContent('Ana Docente')
-    expect(await screen.findByRole('heading', { name: 'Da un Kudo' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dar un Kudo' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Muro' })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('pone arriba del muro el Kudo recién publicado', async () => {
+  it('publica desde el panel: lo cierra, avisa y pone el Kudo arriba del muro', async () => {
     mostrar()
-    await userEvent.selectOptions(await screen.findByLabelText('¿A quién reconoces?'), 'Beto Estudiante')
-    await userEvent.selectOptions(screen.getByLabelText('Categoría'), 'Innovación')
-    await userEvent.type(screen.getByLabelText('Mensaje'), 'Excelente exposición')
     await screen.findAllByRole('article')
+    await userEvent.click(screen.getByRole('button', { name: 'Dar un Kudo' }))
+    const panel = screen.getByRole('dialog', { name: 'Da un Kudo' })
+    await userEvent.selectOptions(await within(panel).findByLabelText('¿A quién reconoces?'), 'Beto Estudiante')
+    await userEvent.selectOptions(within(panel).getByLabelText('Categoría'), 'Innovación')
+    await userEvent.type(within(panel).getByLabelText('Mensaje'), 'Excelente exposición')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Publicar Kudo' }))
+    await userEvent.click(within(panel).getByRole('button', { name: 'Publicar Kudo' }))
 
-    const [primero] = await screen.findAllByRole('article')
+    expect(await screen.findByRole('status')).toHaveTextContent('¡Listo! Tu Kudo ya está en el muro.')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    const [primero] = screen.getAllByRole('article')
     expect(primero).toHaveTextContent('Excelente exposición')
   })
 

@@ -1,23 +1,28 @@
+/* Fija arriba. En el celular: logo, persona y salir en una fila, y debajo «Dar un Kudo» a lo ancho. */
 .cabecera {
   position: sticky;
   top: 0;
-  z-index: 1;
-  display: flex;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'logo persona salir'
+    'publicar publicar publicar';
   align-items: center;
-  gap: 0.75rem;
-  padding: calc(0.75rem + env(safe-area-inset-top)) 1rem 0.75rem;
-  background: var(--color-superficie);
-  box-shadow: var(--sombra);
+  gap: 0.625rem 0.75rem;
+  padding: calc(0.625rem + env(safe-area-inset-top)) 1rem 0.75rem;
+  border-top: none;
+  border-radius: 0 0 var(--radio) var(--radio);
 }
 
 .logo {
-  flex: none;
+  grid-area: logo;
   width: 2.5rem;
   height: 2.5rem;
 }
 
 .persona {
-  flex: 1;
+  grid-area: persona;
   min-width: 0;
 }
 
@@ -30,10 +35,30 @@
 }
 
 .nombre {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .rol {
   font-size: 0.875rem;
   color: var(--color-texto-suave);
+}
+
+.publicar {
+  grid-area: publicar;
+}
+
+.salir {
+  grid-area: salir;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+/* En pantallas anchas, todo en una fila. */
+@media (min-width: 40rem) {
+  .cabecera {
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas: 'logo persona publicar salir';
+    padding-inline: max(1rem, calc((100% - 56rem) / 2));
+  }
 }
