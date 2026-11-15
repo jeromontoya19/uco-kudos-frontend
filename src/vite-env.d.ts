@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/vanillajs" />
 
 interface ImportMetaEnv {
   /** Commit desplegado. Lo pone el CD al compilar; en local no existe. */

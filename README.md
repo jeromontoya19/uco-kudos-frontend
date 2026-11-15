@@ -86,7 +86,8 @@ cliente HTTP y la sesión se prueban aparte, simulando `fetch` y Auth0.
 - **Manifiesto e íconos:** los genera `vite-plugin-pwa` desde `vite.config.ts`, con los íconos de
   `public/` (normal, *maskable* y de iPhone).
 - **Service worker:** Workbox guarda la app en caché, así que abre sin conexión. Cuando hay una
-  versión nueva, se instala sola y se usa en la siguiente carga.
+  versión nueva, el service worker nuevo toma el control apenas se instala y la página se recarga sola
+  con ella (`src/main.tsx`). Una PWA que vuelve del segundo plano también revisa si hay versión nueva.
 - **Instalación:** en Chrome y Edge, la app muestra el botón «Instalar UCO Kudos». En los demás
   navegadores, explica cómo instalarla desde el menú.
 
