@@ -1,7 +1,8 @@
 # Integración continua (ADR-013, ADR-023).
 # - CI rápida: cada push a codigo-desarrollo. Lint, pruebas unitarias y build.
 # - CI completa: cada PR a codigo-testing o a main. Suma la cobertura, Sonar y Trivy.
-# Las acciones de terceros se fijan por SHA de commit (cadena de suministro).
+# Cadena de suministro: las acciones de terceros se fijan por SHA de commit, y `npm ci --ignore-scripts`
+# no deja que las dependencias corran código al instalarse (ninguna lo necesita en Linux).
 name: CI
 
 on:
@@ -32,7 +33,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Instalar las dependencias exactas del package-lock
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Lint
         run: npm run lint
       - name: Pruebas unitarias
@@ -57,7 +58,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Instalar las dependencias exactas del package-lock
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Lint
         run: npm run lint
       - name: Pruebas unitarias con cobertura (mínimo 70 %)
