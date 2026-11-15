@@ -5,6 +5,10 @@ import { mensajeParaLaPersona } from '../compartido/api/ErrorDeApi'
 import { PanelFlotante } from '../compartido/PanelFlotante'
 import { PantallaDeEstado } from '../compartido/PantallaDeEstado'
 import { useConsulta } from '../compartido/useConsulta'
+import { AvisoFlotante, type AvisoEnPantalla } from '../funcionalidades/avisos/AvisoFlotante'
+import { notificarSiEstaOculta } from '../funcionalidades/avisos/notificaciones'
+import { OfertaDeNotificaciones } from '../funcionalidades/avisos/OfertaDeNotificaciones'
+import { textoDelAviso, useAvisosEnVivo } from '../funcionalidades/avisos/useAvisosEnVivo'
 import { Muro } from '../funcionalidades/muro/Muro'
 import { useMuro } from '../funcionalidades/muro/useMuro'
 import { Cabecera } from '../funcionalidades/perfil/Cabecera'
@@ -64,10 +68,22 @@ export function PantallaPrincipal({ alIniciarSesion, alCerrarSesion }: AccionesD
 
 /** La pantalla de todos los días: el muro, y el panel para publicar que abre el botón de la cabecera. */
 function Inicio({ persona, alCerrarSesion }: { readonly persona: PersonaDeLaSesion; readonly alCerrarSesion: () => void }) {
-  const muro = useMuro(useApi())
-  const { agregarAlInicio } = muro
+  const api = useApi()
+  const muro = useMuro(api)
+  const { agregarAlInicio, traerNuevos } = muro
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [avisoDePublicacion, setAvisoDePublicacion] = useState<string | undefined>()
+  const [avisoEnVivo, setAvisoEnVivo] = useState<AvisoEnPantalla | undefined>()
+
+  // Push en vivo (ADR-021): un aviso en pantalla, el muro al día y, si la app está oculta, una notificación.
+  useAvisosEnVivo(api, (aviso) => {
+    const texto = textoDelAviso(aviso)
+    setAvisoEnVivo({ id: aviso.kudo, texto })
+    traerNuevos()
+    void notificarSiEstaOculta(texto, aviso.kudo)
+  })
+
+  const cerrarAvisoEnVivo = useCallback(() => setAvisoEnVivo(undefined), [])
 
   const abrirPanel = useCallback(() => {
     setAvisoDePublicacion(undefined)
@@ -89,11 +105,13 @@ function Inicio({ persona, alCerrarSesion }: { readonly persona: PersonaDeLaSesi
     <>
       <Cabecera persona={persona} alDarUnKudo={abrirPanel} alCerrarSesion={alCerrarSesion} />
       <main className={estilos.contenido}>
+        <OfertaDeNotificaciones />
         {avisoDePublicacion && (
           <output className={`vidrio-ligero ${estilos.exito}`}>{avisoDePublicacion}</output>
         )}
         <Muro muro={muro} />
       </main>
+      <AvisoFlotante aviso={avisoEnVivo} alCerrar={cerrarAvisoEnVivo} />
       <PanelFlotante abierto={panelAbierto} titulo="Da un Kudo" alCerrar={cerrarPanel}>
         <FormularioDePublicacion persona={persona} alPublicar={alPublicar} />
       </PanelFlotante>

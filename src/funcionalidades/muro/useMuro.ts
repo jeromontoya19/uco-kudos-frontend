@@ -15,6 +15,8 @@ export interface EstadoDelMuro {
   readonly cargarMas: () => void
   /** Pone arriba un Kudo recién publicado, sin volver a pedir el muro. */
   readonly agregarAlInicio: (kudo: KudoDelMuro) => void
+  /** Vuelve a pedir la primera página y pone arriba los Kudos que todavía no se muestran. */
+  readonly traerNuevos: () => void
 }
 
 /**
@@ -24,6 +26,12 @@ export interface EstadoDelMuro {
 function unirSinRepetir(actuales: readonly KudoDelMuro[], nuevos: readonly KudoDelMuro[]): readonly KudoDelMuro[] {
   const yaMostrados = new Set(actuales.map((kudo) => kudo.id))
   return [...actuales, ...nuevos.filter((kudo) => !yaMostrados.has(kudo.id))]
+}
+
+/** Los Kudos recientes que todavía no estaban, arriba y en su orden; después, los que ya se mostraban. */
+function unirAlInicio(recientes: readonly KudoDelMuro[], actuales: readonly KudoDelMuro[]): readonly KudoDelMuro[] {
+  const yaMostrados = new Set(actuales.map((kudo) => kudo.id))
+  return [...recientes.filter((kudo) => !yaMostrados.has(kudo.id)), ...actuales]
 }
 
 export function useMuro(api: ApiDeUcoKudos): EstadoDelMuro {
@@ -76,5 +84,14 @@ export function useMuro(api: ApiDeUcoKudos): EstadoDelMuro {
     setKudos((actuales) => [kudo, ...actuales.filter((actual) => actual.id !== kudo.id)])
   }, [])
 
-  return { kudos, cargando, hayMas, error, cargarMas, agregarAlInicio }
+  const traerNuevos = useCallback(() => {
+    api.muro(0, TAMANO_DE_PAGINA).then(
+      (recientes) => setKudos((actuales) => unirAlInicio(recientes, actuales)),
+      () => {
+        // Si falla, el muro sigue como estaba: el Kudo nuevo aparece al pedir más o en el próximo aviso.
+      },
+    )
+  }, [api])
+
+  return { kudos, cargando, hayMas, error, cargarMas, agregarAlInicio, traerNuevos }
 }

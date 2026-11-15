@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
+import { conexionAbierta } from '../../pruebas/flujos'
 import { crearClienteHttp } from './clienteHttp'
 import { ErrorDeApi } from './ErrorDeApi'
+import type { EventoSse } from './sse'
 
 const URL_BASE = 'https://api.prueba'
 
@@ -108,5 +110,18 @@ describe('crearClienteHttp', () => {
 
     expect(error.tipo).toBe('sin-sesion')
     expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('escucha un flujo en la URL de la API con el mismo token, hasta que se cierra', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(conexionAbierta)
+
+    const cerrar = crearCliente(fetch).escuchar('/api/avisos/en-vivo', vi.fn<(evento: EventoSse) => void>())
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledOnce())
+    cerrar()
+
+    const [url, opciones] = fetch.mock.calls[0] ?? []
+    expect(url).toBe('https://api.prueba/api/avisos/en-vivo')
+    expect(opciones?.headers).toMatchObject({ Authorization: 'Bearer token-de-prueba' })
+    expect(opciones?.signal?.aborted).toBe(true)
   })
 })

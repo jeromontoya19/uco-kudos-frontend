@@ -87,4 +87,22 @@ describe('useSesion', () => {
 
     await expect(result.current.obtenerToken()).rejects.toBeInstanceOf(ErrorDeApi)
   })
+
+  it('usa el token de la caché si no se pide renovarlo', async () => {
+    simularAuth0({ isAuthenticated: true })
+    const { result } = renderHook(() => useSesion())
+
+    await result.current.obtenerToken({ renovar: false })
+
+    expect(getAccessTokenSilently).toHaveBeenCalledWith(undefined)
+  })
+
+  it('pide un token nuevo, sin la caché, cuando se pide renovarlo', async () => {
+    simularAuth0({ isAuthenticated: true })
+    const { result } = renderHook(() => useSesion())
+
+    await result.current.obtenerToken({ renovar: true })
+
+    expect(getAccessTokenSilently).toHaveBeenCalledWith({ cacheMode: 'off' })
+  })
 })
