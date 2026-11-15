@@ -1,0 +1,82 @@
+# Vuelta atrás (ESC-15, ADR-023): vuelve a publicar en Azure Static Web Apps la versión de un commit
+# anterior de main y deja en el resumen cuánto tardó. Se lanza a mano desde la rama main.
+# Static Web Apps no guarda versiones anteriores, así que se compila ese commit con su propio
+# package-lock: las mismas versiones exactas de las dependencias que tuvo cuando se desplegó.
+name: Vuelta atrás
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: SHA completo de un commit de main al que se vuelve
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: despliegue-produccion
+  cancel-in-progress: false
+
+jobs:
+  volver:
+    name: Volver a la versión de un commit anterior
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      COMMIT: ${{ inputs.commit }}
+      CARPETA: version-anterior
+    steps:
+      - name: Validar el commit y marcar el inicio
+        run: |
+          if [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::El commit debe ser un SHA completo (40 caracteres en minúscula)."
+            exit 1
+          fi
+          echo "INICIO=$(date +%s)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # El historial completo, para comprobar que el commit está en main.
+          fetch-depth: 0
+
+      # Solo se vuelve a versiones que pasaron por la CI completa y por un PR a main.
+      - name: Comprobar que el commit está en main
+        run: |
+          if ! git merge-base --is-ancestor "$COMMIT" HEAD 2>/dev/null; then
+            echo "::error::El commit $COMMIT no está en la historia de main."
+            exit 1
+          fi
+      # Los scripts salen de main; el código que se publica, del commit elegido.
+      - name: Sacar el código del commit
+        run: |
+          mkdir "$CARPETA"
+          git archive "$COMMIT" | tar -x -C "$CARPETA"
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: version-anterior/.nvmrc
+          cache: npm
+          cache-dependency-path: version-anterior/package-lock.json
+      - name: Instalar las dependencias exactas de su package-lock
+        working-directory: version-anterior
+        run: npm ci
+      - name: Compilar con la versión de ese commit
+        working-directory: version-anterior
+        run: npm run build
+        env:
+          VITE_VERSION: ${{ inputs.commit }}
+
+      - name: Desplegar en Azure Static Web Apps
+        id: despliegue
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9 # v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: version-anterior/dist
+          skip_app_build: true
+      - name: Comprobar que responde la versión anterior
+        run: bash .github/scripts/verificar-despliegue.sh "$URL_DEL_SITIO" "$COMMIT" "$INICIO"
+        env:
+          URL_DEL_SITIO: ${{ steps.despliegue.outputs.static_web_app_url }}

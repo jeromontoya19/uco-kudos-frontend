@@ -5,7 +5,7 @@ Aplicación web *mobile first* de la plataforma institucional de reconocimientos
 
 > **Jerónimo Montoya Londoño** · Proyecto integrador de Ingeniería del Software II
 
-**URL pública:** _pendiente: la URL de `ucokudos-web` (Azure Static Web Apps) tras el primer CD_ ·
+**URL pública:** <https://happy-bush-0fa58021e.4.azurestaticapps.net> (Azure Static Web Apps) ·
 **Back-End y documentación:** [`uco-kudos-backend`](https://github.com/jeromontoya19/uco-kudos-backend)
 (la documentación vive en su carpeta `docs/`)
 
@@ -76,4 +76,9 @@ funcionalidades no se importan entre sí: `App` las compone.
   con corrección, también en las dependencias de desarrollo.
 - **CD** (`.github/workflows/cd.yml`): compila con el commit como versión, despliega en
   `ucokudos-web` con la acción oficial de Static Web Apps y comprueba que el sitio sirve ese commit.
+  El resumen del job dice cuánto tardó.
+- **Vuelta atrás** (`.github/workflows/vuelta-atras.yml`, `ESC-15`): en *Actions → Vuelta atrás →
+  Run workflow*, desde `main`, con el SHA completo de un commit anterior de `main`. Static Web Apps
+  no guarda versiones anteriores, así que el workflow compila ese commit con su propio
+  `package-lock.json` (las mismas versiones exactas), lo publica y comprueba que el sitio lo sirve.
 - Las acciones de terceros se fijan por SHA de commit.

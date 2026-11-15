@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      - name: Marcar el inicio
+        run: echo "INICIO=$(date +%s)" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -44,6 +46,6 @@ jobs:
           app_location: dist
           skip_app_build: true
       - name: Comprobar que responde la versión nueva
-        run: bash .github/scripts/verificar-despliegue.sh "$URL_DEL_SITIO" "$GITHUB_SHA"
+        run: bash .github/scripts/verificar-despliegue.sh "$URL_DEL_SITIO" "$GITHUB_SHA" "$INICIO"
         env:
           URL_DEL_SITIO: ${{ steps.despliegue.outputs.static_web_app_url }}
