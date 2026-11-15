@@ -9,15 +9,15 @@ describe('PantallaBienvenida', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'UCO Kudos' })).toBeInTheDocument()
   })
 
-  it('anuncia las tres funciones que vienen', () => {
+  it('presenta las tres cosas que se pueden hacer', () => {
     render(<PantallaBienvenida version="local" />)
 
-    const seccion = screen.getByRole('region', { name: 'Muy pronto podrás' })
+    const seccion = screen.getByRole('region', { name: 'Con UCO Kudos puedes' })
     const funciones = within(seccion).getAllByRole('listitem')
     expect(funciones.map((funcion) => funcion.querySelector('strong')?.textContent)).toEqual([
       'Da un Kudo',
       'Mira el muro',
-      'Recibe avisos',
+      'Llévala en tu celular',
     ])
   })
 
