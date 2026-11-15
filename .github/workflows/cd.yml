@@ -1,0 +1,49 @@
+# Despliegue continuo (ADR-022, ADR-023): cada merge a main compila la PWA con la versión del commit
+# y la publica en Azure Static Web Apps (ucokudos-web) con la acción oficial.
+# La acción entra con el token de despliegue del recurso, guardado en el secreto
+# AZURE_STATIC_WEB_APPS_API_TOKEN; el recurso no está conectado a GitHub.
+name: CD
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**/*.md"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: despliegue-produccion
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    name: Compilar y desplegar en Azure Static Web Apps
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Instalar las dependencias exactas del package-lock
+        run: npm ci
+      - name: Compilar con la versión del commit
+        run: npm run build
+        env:
+          VITE_VERSION: ${{ github.sha }}
+
+      # La PWA ya viene compilada: la acción solo sube dist/ (sin Oryx y sin API).
+      - name: Desplegar en Azure Static Web Apps
+        id: despliegue
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9 # v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: dist
+          skip_app_build: true
+      - name: Comprobar que responde la versión nueva
+        run: bash .github/scripts/verificar-despliegue.sh "$URL_DEL_SITIO" "$GITHUB_SHA"
+        env:
+          URL_DEL_SITIO: ${{ steps.despliegue.outputs.static_web_app_url }}
