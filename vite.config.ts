@@ -48,6 +48,13 @@ export default defineConfig({
       '/api': {
         target: 'https://ucokudos-api.grayriver-ab7e245b.canadacentral.azurecontainerapps.io',
         changeOrigin: true,
+        // En los POST el navegador manda «Origin: http://localhost:5173», y la API rechaza ese origen
+        // con 403 («Invalid CORS request»). Sin el encabezado, la API trata la llamada como de servidor.
+        configure: (proxy) => {
+          proxy.on('proxyReq', (peticion) => {
+            peticion.removeHeader('origin')
+          })
+        },
       },
     },
   },

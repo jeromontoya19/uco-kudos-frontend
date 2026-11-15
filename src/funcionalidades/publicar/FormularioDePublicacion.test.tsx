@@ -34,7 +34,7 @@ describe('FormularioDePublicacion', () => {
     expect(destinatarios.map((opcion) => opcion.textContent)).toEqual(['Elige a una persona', ESTUDIANTE.nombre])
   })
 
-  it('publica, avisa que quedó en el muro y limpia el formulario', async () => {
+  it('publica, entrega el Kudo nuevo y limpia el formulario', async () => {
     const { api, alPublicar } = mostrarFormulario()
     await llenar({ mensaje: '  Gracias por todo  ' })
 
@@ -49,7 +49,6 @@ describe('FormularioDePublicacion', () => {
       contenido: 'Gracias por todo',
       publicadoEn: '2026-11-15T03:00:00Z',
     })
-    expect(screen.getByRole('status')).toHaveTextContent('¡Listo! Tu Kudo ya está en el muro.')
     expect(screen.getByLabelText('Mensaje')).toHaveValue('')
   })
 

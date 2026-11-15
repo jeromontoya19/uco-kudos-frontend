@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UCO Kudos">
-  <rect width="512" height="512" rx="112" fill="#0e6b5c"/>
-  <path d="M256.0 120.0 L300.1 209.3 L398.7 223.6 L327.3 293.2 L344.2 391.4 L256.0 345.0 L167.8 391.4 L184.7 293.2 L113.3 223.6 L211.9 209.3 Z"
-        fill="#f5b83d" stroke="#f5b83d" stroke-width="28" stroke-linejoin="round"/>
+  <!-- Fondo verde UCO, un poco más vivo -->
+  <rect width="512" height="512" rx="112" fill="#00875a"/>
+  <!-- La estrella del Kudo -->
+  <path d="M256.0 72.0 L313.6 188.7 L442.4 207.4 L349.2 298.3 L371.2 426.6 L256.0 366.0 L140.8 426.6 L162.8 298.3 L69.6 207.4 L198.4 188.7 Z"
+        fill="#ffd000" stroke="#ffd000" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Dentro, el escudo de la UCO: cuadro verde, rayos blancos y estrella amarilla de cuatro puntas -->
+  <rect x="182" y="194" width="148" height="148" rx="34" fill="#007751"/>
+  <path d="M256.0 210.0 L262.0 237.6 L278.2 214.4 L273.2 242.2 L297.0 227.0 L281.8 250.8 L309.6 245.8 L286.4 262.0 L314.0 268.0 L286.4 274.0 L309.6 290.2 L281.8 285.2 L297.0 309.0 L273.2 293.8 L278.2 321.6 L262.0 298.4 L256.0 326.0 L250.0 298.4 L233.8 321.6 L238.8 293.8 L215.0 309.0 L230.2 285.2 L202.4 290.2 L225.6 274.0 L198.0 268.0 L225.6 262.0 L202.4 245.8 L230.2 250.8 L215.0 227.0 L238.8 242.2 L233.8 214.4 L250.0 237.6 Z"
+        fill="#ffffff"/>
+  <path d="M256.0 196.0 L266.0 258.0 L328.0 268.0 L266.0 278.0 L256.0 340.0 L246.0 278.0 L184.0 268.0 L246.0 258.0 Z"
+        fill="#ffd000"/>
 </svg>
