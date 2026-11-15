@@ -1,0 +1,54 @@
+/* Tokens de diseño: todos los colores y medidas comunes salen de aquí. */
+:root {
+  --color-primario: #0e6b5c;
+  --color-primario-oscuro: #0a5146;
+  --color-sobre-primario: #ffffff;
+  --color-acento: #f5b83d;
+  --color-fondo: #f7f5ef;
+  --color-superficie: #ffffff;
+  --color-texto: #1b2a27;
+  --color-texto-suave: #4a5a56;
+  --color-enfasis: #0e6b5c;
+  --color-borde: #c9d3d0;
+  --radio: 1rem;
+  --sombra: 0 0.125rem 0.75rem rgb(14 107 92 / 0.12);
+  --fuente: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fondo: #0f1a18;
+    --color-superficie: #172623;
+    --color-texto: #e8efed;
+    --color-texto-suave: #a9bab6;
+    --color-enfasis: #7fd6c2;
+    --color-borde: #2e4440;
+    --sombra: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  line-height: 1.5;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
