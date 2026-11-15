@@ -17,7 +17,7 @@ export function AvisoDeInstalacion() {
   }
 
   return (
-    <p className={estilos.pista}>
+    <p className={`vidrio-ligero ${estilos.pista}`}>
       Para tenerla en tu celular, abre el menú del navegador y elige «Instalar aplicación» o
       «Agregar a la pantalla de inicio». En iPhone, usa el botón Compartir de Safari.
     </p>

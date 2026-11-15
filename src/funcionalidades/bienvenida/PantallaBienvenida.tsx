@@ -33,11 +33,13 @@ export function PantallaBienvenida({ version, children }: PropiedadesPantallaBie
     <main className={estilos.pantalla}>
       <header className={estilos.encabezado}>
         <img className={estilos.logo} src="/logo.svg" alt="" width={96} height={96} />
-        <h1 className={estilos.titulo}>UCO Kudos</h1>
+        <h1 className={estilos.titulo}>
+          UCO <span className="resaltado">Kudos</span>
+        </h1>
         <p className={estilos.lema}>Reconoce a quienes hacen grande a la UCO.</p>
       </header>
 
-      <section className={estilos.tarjeta} aria-labelledby="titulo-funciones">
+      <section className={`vidrio ${estilos.tarjeta}`} aria-labelledby="titulo-funciones">
         <h2 id="titulo-funciones" className={estilos.subtitulo}>
           Con UCO Kudos puedes
         </h2>

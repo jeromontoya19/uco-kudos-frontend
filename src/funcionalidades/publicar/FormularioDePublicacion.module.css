@@ -1,17 +1,3 @@
-.tarjeta {
-  display: grid;
-  gap: 1rem;
-  padding: 1.25rem;
-  border-radius: var(--radio);
-  background: var(--color-superficie);
-  box-shadow: var(--sombra);
-}
-
-.titulo {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
 .formulario {
   display: grid;
   gap: 1rem;
@@ -28,16 +14,8 @@
   color: var(--color-texto-suave);
 }
 
-.exito,
 .error {
   margin: 0;
   font-weight: 600;
-}
-
-.exito {
-  color: var(--color-enfasis);
-}
-
-.error {
   color: var(--color-error);
 }

@@ -36,9 +36,6 @@
 
 .tarjeta {
   padding: 1.25rem;
-  border-radius: var(--radio);
-  background: var(--color-superficie);
-  box-shadow: var(--sombra);
 }
 
 .subtitulo {

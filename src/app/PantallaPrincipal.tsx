@@ -1,13 +1,15 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useApi } from '../compartido/api/contextoDeApi'
-import type { PersonaDeLaSesion } from '../compartido/api/contrato'
+import type { KudoDelMuro, PersonaDeLaSesion } from '../compartido/api/contrato'
 import { mensajeParaLaPersona } from '../compartido/api/ErrorDeApi'
+import { PanelFlotante } from '../compartido/PanelFlotante'
 import { PantallaDeEstado } from '../compartido/PantallaDeEstado'
 import { useConsulta } from '../compartido/useConsulta'
 import { Muro } from '../funcionalidades/muro/Muro'
 import { useMuro } from '../funcionalidades/muro/useMuro'
 import { Cabecera } from '../funcionalidades/perfil/Cabecera'
 import { FormularioDePublicacion } from '../funcionalidades/publicar/FormularioDePublicacion'
+import { MENSAJE_PUBLICADO } from '../funcionalidades/publicar/mensajesDePublicacion'
 import estilos from './PantallaPrincipal.module.css'
 
 interface AccionesDeSesion {
@@ -60,16 +62,41 @@ export function PantallaPrincipal({ alIniciarSesion, alCerrarSesion }: AccionesD
   }
 }
 
-/** La pantalla de todos los días: publicar arriba y el muro debajo. */
+/** La pantalla de todos los días: el muro, y el panel para publicar que abre el botón de la cabecera. */
 function Inicio({ persona, alCerrarSesion }: { readonly persona: PersonaDeLaSesion; readonly alCerrarSesion: () => void }) {
   const muro = useMuro(useApi())
+  const { agregarAlInicio } = muro
+  const [panelAbierto, setPanelAbierto] = useState(false)
+  const [avisoDePublicacion, setAvisoDePublicacion] = useState<string | undefined>()
+
+  const abrirPanel = useCallback(() => {
+    setAvisoDePublicacion(undefined)
+    setPanelAbierto(true)
+  }, [])
+
+  const cerrarPanel = useCallback(() => setPanelAbierto(false), [])
+
+  const alPublicar = useCallback(
+    (kudo: KudoDelMuro) => {
+      agregarAlInicio(kudo)
+      setPanelAbierto(false)
+      setAvisoDePublicacion(MENSAJE_PUBLICADO)
+    },
+    [agregarAlInicio],
+  )
+
   return (
     <>
-      <Cabecera persona={persona} alCerrarSesion={alCerrarSesion} />
+      <Cabecera persona={persona} alDarUnKudo={abrirPanel} alCerrarSesion={alCerrarSesion} />
       <main className={estilos.contenido}>
-        <FormularioDePublicacion persona={persona} alPublicar={muro.agregarAlInicio} />
+        {avisoDePublicacion && (
+          <output className={`vidrio-ligero ${estilos.exito}`}>{avisoDePublicacion}</output>
+        )}
         <Muro muro={muro} />
       </main>
+      <PanelFlotante abierto={panelAbierto} titulo="Da un Kudo" alCerrar={cerrarPanel}>
+        <FormularioDePublicacion persona={persona} alPublicar={alPublicar} />
+      </PanelFlotante>
     </>
   )
 }

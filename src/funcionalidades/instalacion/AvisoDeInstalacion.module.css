@@ -1,8 +1,6 @@
 .pista {
   margin: 0;
   padding: 1rem;
-  border: 1px dashed var(--color-borde);
-  border-radius: var(--radio);
   font-size: 0.9375rem;
   color: var(--color-texto-suave);
 }

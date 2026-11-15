@@ -1,18 +1,37 @@
-/* Tokens de diseño: todos los colores y medidas comunes salen de aquí. */
+/*
+ * Tokens de diseño: todos los colores y medidas comunes salen de aquí.
+ * Colores institucionales de la UCO: verde #007751, amarillo #e9c404 (aquí, un poco más vivo) y blanco.
+ * Estilo: minimalista, con superficies de cristal y detalles pastel tipo resaltador.
+ */
 :root {
-  --color-primario: #0e6b5c;
-  --color-primario-oscuro: #0a5146;
+  --verde-uco: #007751;
+  --verde-vivo: #00a36c;
+  --amarillo-uco: #ffd000;
+
+  --color-primario: var(--verde-uco);
+  --color-primario-oscuro: #005c3e;
   --color-sobre-primario: #ffffff;
-  --color-acento: #f5b83d;
-  --color-fondo: #f7f5ef;
-  --color-superficie: #ffffff;
-  --color-texto: #1b2a27;
-  --color-texto-suave: #4a5a56;
-  --color-enfasis: #0e6b5c;
-  --color-borde: #c9d3d0;
+  --color-acento: var(--amarillo-uco);
+  --color-sobre-acento: #0b3d2b;
+  --color-fondo: #f3faf6;
+  --color-superficie-solida: #ffffff;
+  --color-campo: rgb(255 255 255 / 0.85);
+  --color-texto: #10261d;
+  --color-texto-suave: #4a6157;
+  --color-enfasis: var(--verde-uco);
+  --color-borde: rgb(0 119 81 / 0.2);
   --color-error: #b3261e;
-  --radio: 1rem;
-  --sombra: 0 0.125rem 0.75rem rgb(14 107 92 / 0.12);
+
+  --resaltador-amarillo: rgb(255 208 0 / 0.45);
+  --resaltador-verde: rgb(0 163 108 / 0.16);
+
+  --vidrio: rgb(255 255 255 / 0.62);
+  --vidrio-ligero: rgb(255 255 255 / 0.72);
+  --vidrio-borde: rgb(255 255 255 / 0.8);
+  --vidrio-desenfoque: blur(18px) saturate(160%);
+
+  --radio: 1.25rem;
+  --sombra: 0 0.5rem 2rem rgb(0 80 54 / 0.1);
   --fuente: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   color-scheme: light dark;
@@ -20,14 +39,28 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-fondo: #0f1a18;
-    --color-superficie: #172623;
-    --color-texto: #e8efed;
-    --color-texto-suave: #a9bab6;
-    --color-enfasis: #7fd6c2;
-    --color-borde: #2e4440;
+    --color-fondo: #08140f;
+    --color-superficie-solida: #10261d;
+    --color-campo: rgb(8 20 15 / 0.7);
+    --color-texto: #e7f4ee;
+    --color-texto-suave: #a6c1b5;
+    --color-enfasis: #5fe0ac;
+    --color-borde: rgb(255 255 255 / 0.14);
     --color-error: #ffb4ab;
-    --sombra: none;
+    --resaltador-amarillo: rgb(255 208 0 / 0.32);
+    --resaltador-verde: rgb(95 224 172 / 0.16);
+    --vidrio: rgb(16 38 29 / 0.55);
+    --vidrio-ligero: rgb(16 38 29 / 0.62);
+    --vidrio-borde: rgb(255 255 255 / 0.1);
+    --sombra: 0 0.5rem 2rem rgb(0 0 0 / 0.35);
+  }
+}
+
+/* Quien pide menos transparencia en su sistema ve superficies sólidas. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --vidrio: var(--color-superficie-solida);
+    --vidrio-ligero: var(--color-superficie-solida);
   }
 }
 
@@ -50,9 +83,47 @@ body {
   color: var(--color-texto);
 }
 
+/* El fondo: manchas suaves de verde y amarillo, fijas, para que el cristal tenga algo que difuminar. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(38rem 28rem at 0% 0%, rgb(0 163 108 / 0.22), transparent 70%),
+    radial-gradient(34rem 26rem at 100% 8%, rgb(255 208 0 / 0.26), transparent 70%),
+    radial-gradient(40rem 30rem at 50% 105%, rgb(0 119 81 / 0.14), transparent 70%);
+}
+
 img {
   display: block;
   max-width: 100%;
+}
+
+/* Superficies de cristal. La ligera no difumina: se usa en listas largas, como el muro, por rendimiento. */
+.vidrio,
+.vidrio-ligero {
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.vidrio {
+  background: var(--vidrio);
+  -webkit-backdrop-filter: var(--vidrio-desenfoque);
+  backdrop-filter: var(--vidrio-desenfoque);
+}
+
+.vidrio-ligero {
+  background: var(--vidrio-ligero);
+}
+
+/* Subrayado pastel, como un resaltador sobre la mitad baja del texto. */
+.resaltado {
+  padding: 0 0.15em;
+  background: linear-gradient(transparent 55%, var(--resaltador-amarillo) 55%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 /* Controles comunes. Botones de al menos 48 px de alto: el mínimo cómodo para tocar con el dedo. */
@@ -60,12 +131,16 @@ img {
   min-height: 3rem;
   padding: 0.75rem 1.5rem;
   border: 2px solid var(--color-primario);
-  border-radius: var(--radio);
+  border-radius: 999px;
   background: var(--color-primario);
   color: var(--color-sobre-primario);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .boton:hover:not(:disabled) {
@@ -73,20 +148,36 @@ img {
   background: var(--color-primario-oscuro);
 }
 
+.boton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
 .boton:disabled {
   opacity: 0.6;
   cursor: progress;
 }
 
+/* La acción principal de la app, en el amarillo de la UCO. */
+.boton-acento {
+  border-color: var(--color-acento);
+  background: var(--color-acento);
+  color: var(--color-sobre-acento);
+}
+
+.boton-acento:hover:not(:disabled) {
+  border-color: #f0c200;
+  background: #f0c200;
+}
+
 .boton-secundario {
+  border-color: var(--color-borde);
   background: transparent;
   color: var(--color-enfasis);
-  border-color: var(--color-borde);
 }
 
 .boton-secundario:hover:not(:disabled) {
   border-color: var(--color-enfasis);
-  background: transparent;
+  background: var(--resaltador-verde);
 }
 
 .boton:focus-visible,
@@ -101,10 +192,10 @@ select,
 textarea {
   width: 100%;
   min-height: 3rem;
-  padding: 0.625rem 0.75rem;
+  padding: 0.625rem 0.875rem;
   border: 1px solid var(--color-borde);
-  border-radius: 0.75rem;
-  background: var(--color-superficie);
+  border-radius: 0.875rem;
+  background: var(--color-campo);
   color: var(--color-texto);
   font: inherit;
   font-size: max(1rem, 16px);
@@ -119,4 +210,10 @@ textarea {
   margin: 0;
   font-weight: 600;
   color: var(--color-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton {
+    transition: none;
+  }
 }
