@@ -33,27 +33,53 @@ MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W):/app" -v uco-kudos-front-node-m
 
 El service worker solo se registra con `npm run build` y `npm run preview`, no con `npm run dev`.
 
+**La API en local.** Con `npm run dev`, el front llama a `/api` en su mismo origen, y el proxy de Vite
+lo reenvía a la API de producción. Así no hace falta que la API acepte `localhost` en CORS. El inicio de
+sesión funciona en `http://localhost:5173`, que está registrado en Auth0. Para usar otra API, como el
+back corriendo en local, define `VITE_API_URL` (ver `.env.example`). `npm run preview` no sirve para
+iniciar sesión: el puerto 4173 no está registrado en Auth0, y la API no acepta ese origen.
+
 ## Estructura
 
 ```text
 src/
-  main.tsx                 raíz de composición: monta la app
-  app/                     App: compone las funcionalidades
+  main.tsx                 monta la app
+  app/                     raíz: arma la sesión y la API, y elige la pantalla
   funcionalidades/
-    bienvenida/            pantalla de bienvenida
+    sesion/                Auth0: el único lugar que lo conoce (proveedor + useSesion)
+    perfil/                cabecera con el nombre y el rol
+    publicar/              formulario para dar un Kudo y sus mensajes de error
+    muro/                  el muro paginado («Ver más») y la tarjeta de cada Kudo
+    bienvenida/            pantalla de bienvenida, sin sesión
     instalacion/           ofrecer la instalación de la PWA (hook + aviso)
   compartido/
-    estilos/global.css     tokens de diseño (colores, medidas) y estilos base
-    version.ts             versión desplegada (commit corto, o «local»)
-  pruebas/                 configuración y ayudas de las pruebas
+    api/                   contrato de la API, cliente HTTP con el token y errores tipados
+    configuracion.ts       Auth0 y la URL de la API (valores públicos)
+    useConsulta.ts         cargar datos con estados de carga, error y reintento
+    estilos/global.css     tokens de diseño, botones y campos
+  pruebas/                 configuración, datos de prueba y una API falsa
 public/
   logo.svg                 logo, del que salen los íconos PNG
-  staticwebapp.config.json rutas y cabeceras de Azure Static Web Apps
+  staticwebapp.config.json rutas y cabeceras de Azure Static Web Apps (CSP incluida)
 config/marca.ts            colores compartidos por el manifiesto y los íconos
 ```
 
 Cada funcionalidad guarda junto a ella su componente, sus estilos (CSS Modules) y sus pruebas. Las
-funcionalidades no se importan entre sí: `App` las compone.
+funcionalidades no se importan entre sí: `app/` las compone. Los componentes hablan con la API por el
+puerto `ApiDeUcoKudos` (`compartido/api/contrato.ts`), así que las pruebas le pasan una API falsa; el
+cliente HTTP y la sesión se prueban aparte, simulando `fetch` y Auth0.
+
+## Sesión y API
+
+- **Inicio de sesión:** Auth0, con el flujo de código y PKCE de `@auth0/auth0-react` (`ADR-007`). El
+  token se pide con la audiencia `https://api.ucokudos`; sin ella, la API no lo acepta.
+- **Dónde quedan los tokens:** en `localStorage`, con refresh tokens rotativos. Así la PWA instalada
+  no pide iniciar sesión cada vez que se abre. El riesgo es que un script inyectado (XSS) los lea; lo
+  reducen la CSP estricta, que React muestre el contenido de los Kudos solo como texto y que el access
+  token dure 15 min. La decisión completa está en `src/funcionalidades/sesion/ProveedorDeSesion.tsx`.
+- **Errores de la API:** el 401 pide volver a iniciar sesión; el 403 muestra «Tu cuenta aún no está
+  habilitada»; cada motivo del 422 al publicar tiene su mensaje.
+- **CSP:** `connect-src` solo deja llamar a la API y a Auth0.
 
 ## PWA
 

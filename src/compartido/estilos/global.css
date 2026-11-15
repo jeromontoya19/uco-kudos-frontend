@@ -10,6 +10,7 @@
   --color-texto-suave: #4a5a56;
   --color-enfasis: #0e6b5c;
   --color-borde: #c9d3d0;
+  --color-error: #b3261e;
   --radio: 1rem;
   --sombra: 0 0.125rem 0.75rem rgb(14 107 92 / 0.12);
   --fuente: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -25,6 +26,7 @@
     --color-texto-suave: #a9bab6;
     --color-enfasis: #7fd6c2;
     --color-borde: #2e4440;
+    --color-error: #ffb4ab;
     --sombra: none;
   }
 }
@@ -51,4 +53,70 @@ body {
 img {
   display: block;
   max-width: 100%;
+}
+
+/* Controles comunes. Botones de al menos 48 px de alto: el mínimo cómodo para tocar con el dedo. */
+.boton {
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--color-primario);
+  border-radius: var(--radio);
+  background: var(--color-primario);
+  color: var(--color-sobre-primario);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton:hover:not(:disabled) {
+  border-color: var(--color-primario-oscuro);
+  background: var(--color-primario-oscuro);
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.boton-secundario {
+  background: transparent;
+  color: var(--color-enfasis);
+  border-color: var(--color-borde);
+}
+
+.boton-secundario:hover:not(:disabled) {
+  border-color: var(--color-enfasis);
+  background: transparent;
+}
+
+.boton:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 0.1875rem solid var(--color-acento);
+  outline-offset: 0.125rem;
+}
+
+/* 16 px como mínimo: con menos, Safari del iPhone acerca la página al tocar el campo. */
+select,
+textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 0.75rem;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font: inherit;
+  font-size: max(1rem, 16px);
+  font-weight: 400;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.aviso-de-error {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-error);
 }

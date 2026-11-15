@@ -41,6 +41,16 @@ export default defineConfig({
       },
     }),
   ],
+  // En desarrollo, /api va a la API de producción por este proxy: el navegador ve un solo origen, así que
+  // no hace falta que la API acepte localhost en CORS. La URL es la de src/compartido/configuracion.ts.
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://ucokudos-api.grayriver-ab7e245b.canadacentral.azurecontainerapps.io',
+        changeOrigin: true,
+      },
+    },
+  },
   // La vista previa local usa las mismas cabeceras de seguridad que Azure Static Web Apps.
   preview: {
     headers: configuracionDeAzure.globalHeaders,

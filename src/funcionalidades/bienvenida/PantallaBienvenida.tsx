@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 import estilos from './PantallaBienvenida.module.css'
 
-interface FuncionProxima {
+interface Funcion {
   readonly titulo: string
   readonly detalle: string
 }
 
-const FUNCIONES_PROXIMAS: readonly FuncionProxima[] = [
+const FUNCIONES: readonly Funcion[] = [
   {
     titulo: 'Da un Kudo',
     detalle: 'Reconoce a un compañero, docente o colaborador en una sola pantalla.',
@@ -16,15 +16,15 @@ const FUNCIONES_PROXIMAS: readonly FuncionProxima[] = [
     detalle: 'Encuentra los reconocimientos de toda la comunidad UCO.',
   },
   {
-    titulo: 'Recibe avisos',
-    detalle: 'Entérate por correo o por WhatsApp cuando alguien te reconozca.',
+    titulo: 'Llévala en tu celular',
+    detalle: 'Instálala y ábrela desde su ícono, como cualquier aplicación.',
   },
 ]
 
 interface PropiedadesPantallaBienvenida {
   /** Versión corta del commit desplegado, o «local». */
   readonly version: string
-  /** Lo que va en la zona de acciones; hoy, el aviso para instalar la PWA. */
+  /** Lo que va en la zona de acciones: iniciar sesión y el aviso para instalar la PWA. */
   readonly children?: ReactNode
 }
 
@@ -37,12 +37,12 @@ export function PantallaBienvenida({ version, children }: PropiedadesPantallaBie
         <p className={estilos.lema}>Reconoce a quienes hacen grande a la UCO.</p>
       </header>
 
-      <section className={estilos.tarjeta} aria-labelledby="titulo-proximamente">
-        <h2 id="titulo-proximamente" className={estilos.subtitulo}>
-          Muy pronto podrás
+      <section className={estilos.tarjeta} aria-labelledby="titulo-funciones">
+        <h2 id="titulo-funciones" className={estilos.subtitulo}>
+          Con UCO Kudos puedes
         </h2>
         <ul className={estilos.lista}>
-          {FUNCIONES_PROXIMAS.map(({ titulo, detalle }) => (
+          {FUNCIONES.map(({ titulo, detalle }) => (
             <li key={titulo} className={estilos.elemento}>
               <strong>{titulo}</strong>
               <span>{detalle}</span>

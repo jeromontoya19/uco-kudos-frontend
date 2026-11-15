@@ -10,7 +10,7 @@ export function AvisoDeInstalacion() {
 
   if (estado === 'disponible') {
     return (
-      <button type="button" className={estilos.boton} onClick={() => void instalar()}>
+      <button type="button" className="boton" onClick={() => void instalar()}>
         Instalar UCO Kudos
       </button>
     )
