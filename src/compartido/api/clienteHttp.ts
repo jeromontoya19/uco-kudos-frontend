@@ -1,11 +1,18 @@
 import { ErrorDeApi } from './ErrorDeApi'
+import { abrirFlujoSse } from './flujoSse'
+import type { EventoSse } from './sse'
 
-/** Entrega un access token vigente; si no puede, lanza un ErrorDeApi de tipo `sin-sesion`. */
-export type ObtenerToken = () => Promise<string>
+/**
+ * Entrega un access token vigente; si no puede, lanza un ErrorDeApi de tipo `sin-sesion`.
+ * Con `renovar`, no usa el de la caché: se pide uno nuevo (por ejemplo, después de un 401).
+ */
+export type ObtenerToken = (opciones?: { readonly renovar?: boolean }) => Promise<string>
 
 export interface ClienteHttp {
   obtener<T>(ruta: string): Promise<T>
   enviar<T>(ruta: string, cuerpo: unknown): Promise<T>
+  /** Escucha un flujo SSE y se reconecta solo. Devuelve la función que lo cierra. */
+  escuchar(ruta: string, alEvento: (evento: EventoSse) => void): () => void
 }
 
 interface DependenciasDelCliente {
@@ -77,5 +84,6 @@ export function crearClienteHttp({ urlBase, obtenerToken, fetch = globalThis.fet
   return {
     obtener: (ruta) => pedir(ruta, 'GET'),
     enviar: (ruta, cuerpo) => pedir(ruta, 'POST', cuerpo),
+    escuchar: (ruta, alEvento) => abrirFlujoSse({ url: `${urlBase}${ruta}`, obtenerToken, alEvento, fetch }),
   }
 }

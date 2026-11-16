@@ -25,10 +25,11 @@ function estadoDe(cargando: boolean, autenticada: boolean): EstadoDeSesion {
 export function useSesion(): Sesion {
   const { isLoading, isAuthenticated, error, loginWithRedirect, logout, getAccessTokenSilently } = useAuth0()
 
-  const obtenerToken = useCallback(async () => {
+  const obtenerToken: ObtenerToken = useCallback(async (opciones) => {
     let token: string | undefined
     try {
-      token = await getAccessTokenSilently()
+      // Con «renovar», Auth0 no responde desde la caché: usa el refresh token para dar uno nuevo.
+      token = await getAccessTokenSilently(opciones?.renovar ? { cacheMode: 'off' } : undefined)
     } catch (causa) {
       // Sin refresh token vigente, o Auth0 no responde: hay que volver a iniciar sesión.
       throw new ErrorDeApi('sin-sesion', 'No se pudo obtener el access token.', { causa })

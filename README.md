@@ -52,8 +52,9 @@ src/
     muro/                  el muro paginado («Ver más») y la tarjeta de cada Kudo
     bienvenida/            pantalla de bienvenida, sin sesión
     instalacion/           ofrecer la instalación de la PWA (hook + aviso)
+    avisos/                avisos en vivo: el aviso en pantalla y las notificaciones del sistema
   compartido/
-    api/                   contrato de la API, cliente HTTP con el token y errores tipados
+    api/                   contrato de la API, cliente HTTP con el token, flujo SSE y errores tipados
     configuracion.ts       Auth0 y la URL de la API (valores públicos)
     useConsulta.ts         cargar datos con estados de carga, error y reintento
     estilos/global.css     tokens de diseño, botones y campos
@@ -80,6 +81,25 @@ cliente HTTP y la sesión se prueban aparte, simulando `fetch` y Auth0.
 - **Errores de la API:** el 401 pide volver a iniciar sesión; el 403 muestra «Tu cuenta aún no está
   habilitada»; cada motivo del 422 al publicar tiene su mensaje.
 - **CSP:** `connect-src` solo deja llamar a la API y a Auth0.
+
+## Avisos en vivo (push)
+
+Cuando alguien te da un Kudo, la API te avisa al momento por `GET /api/avisos/en-vivo`, un flujo
+*Server-Sent Events* (`ADR-021`). El aviso solo llega con la app abierta, aunque esté en segundo plano;
+no es Web Push.
+
+- **Cómo se escucha:** con `fetch` y un `ReadableStream`, no con `EventSource`, que no deja mandar el
+  encabezado `Authorization`. El lector de eventos es propio y pequeño (`compartido/api/sse.ts`).
+- **Cuándo:** se abre al entrar con la cuenta lista y se cierra al cerrar sesión; una conexión por
+  pestaña. El comentario `:latido` del servidor (cada 25 s) se ignora.
+- **Reconexión:** el servidor cierra cada conexión a los 30 min. Al cerrarse, al caerse la red o con un
+  401, se vuelve a conectar con un token fresco, esperando 1, 2, 4… hasta 30 s si falla seguido
+  (`compartido/api/flujoSse.ts`).
+- **Qué ve la persona:** «Ana te dio un Kudo de Colaboración» abajo de la pantalla durante 8 s, y el
+  Kudo nuevo arriba del muro. Si dio permiso y la app está en segundo plano, también una notificación
+  del sistema, que muestra el service worker. El permiso se ofrece en el muro y solo se pide al tocar
+  «Activar avisos».
+- **En local:** el proxy `/api` de Vite deja pasar el flujo evento por evento, sin acumularlo.
 
 ## PWA
 
